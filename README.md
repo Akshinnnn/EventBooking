@@ -2,6 +2,14 @@
 
 The Online Event Booking Platform is a web application where users can discover events, book tickets, and manage their reservations, while admins and event coordinators have their own roles to manage the platform. Users start by registering or logging in, and once authenticated, they can browse events like concerts, workshops, or conferences, with details such as date, location, price, and ticket availability. They can search or filter events, book tickets, and receive confirmation notifications after a simulated payment process. Users can also view their booking history and details in their accounts.Admins have access to a dashboard where they can manage users, events, and overall platform settings. They can add, update, or remove events, view all bookings. Event coordinators, on the other hand, can create and manage events they are responsible for.
 
+## Architecture
+![Picture1](https://github.com/user-attachments/assets/34c1c5ab-58df-425f-817f-2de00cbfa98f)
+
+
+## DB Diagram
+![Picture2](https://github.com/user-attachments/assets/0bd686a4-30c2-44b6-b5c1-c735da0ef93d)
+
+
 ## Resources
 
 ### User Service
