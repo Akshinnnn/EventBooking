@@ -1,0 +1,196 @@
+services:
+  discoveryserver:
+    image: ${PROJECT_NAME}_discovery
+    container_name: ${PROJECT_NAME}_discovery
+    build:
+      context: ./backend/discoveryserver
+    restart: unless-stopped
+    ports:
+      - 8761:8761
+    env_file:
+      - ./config/.env
+    environment:
+      - SERVER_PORT=8761
+    networks:
+      - default
+
+  apigateway:
+    image: ${PROJECT_NAME}_gateway
+    container_name: ${PROJECT_NAME}_gateway
+    build:
+      context: ./backend/apigateway
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    env_file:
+      - ./config/.env
+    depends_on:
+      - discoveryserver
+    networks:
+      - default
+
+  userservice:
+    image: ${PROJECT_NAME}_user
+    container_name: ${PROJECT_NAME}_user
+    build:
+      context: ./backend/userservice
+    restart: unless-stopped
+    ports:
+      - 8081:8080
+    env_file:
+      - ./config/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - default
+
+  eventservice:
+    image: ${PROJECT_NAME}_event
+    container_name: ${PROJECT_NAME}_event
+    build:
+      context: ./backend/eventservice
+    restart: unless-stopped
+    ports:
+      - 8082:8080
+    env_file:
+      - ./config/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - default
+
+  bookingservice_1:
+    image: ${PROJECT_NAME}_booking
+    container_name: ${PROJECT_NAME}_booking_1
+    build:
+      context: ./backend/bookingservice
+    restart: unless-stopped
+    ports:
+      - 8083:8080
+    env_file:
+      - ./config/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - default
+
+  bookingservice_2:
+    image: ${PROJECT_NAME}_booking
+    container_name: ${PROJECT_NAME}_booking_2
+    build:
+      context: ./backend/bookingservice
+    restart: unless-stopped
+    ports:
+      - 8084:8080
+    env_file:
+      - ./config/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - default
+
+  paymentservice:
+    image: ${PROJECT_NAME}_payment
+    container_name: ${PROJECT_NAME}_payment
+    build:
+      context: ./backend/paymentservice
+    restart: unless-stopped
+    ports:
+      - 8085:8080
+    env_file:
+      - ./config/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - default
+
+  notificationservice:
+    image: ${PROJECT_NAME}_notification
+    container_name: ${PROJECT_NAME}_notification
+    build:
+      context: ./backend/notificationservice
+    restart: unless-stopped
+    ports:
+      - 8086:8080
+    env_file:
+      - ./config/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - default
+
+  reviewservice:
+    image: ${PROJECT_NAME}_review
+    container_name: ${PROJECT_NAME}_review
+    build:
+      context: ./backend/reviewservice
+    restart: unless-stopped
+    ports:
+      - 8087:8080
+    env_file:
+      - ./config/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - default
+
+  db:
+    image: postgres:14.2-alpine
+    container_name: ${PROJECT_NAME}_db
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data/
+    env_file:
+      - ./config/.env
+    networks:
+      - default
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.2
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - default
+
+  broker:
+    image: confluentinc/cp-kafka:7.3.2
+    container_name: broker
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092,PLAINTEXT_INTERNAL://broker:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    networks:
+      - default
+
+volumes:
+  pgdata:
+    driver: local
+    name: ${PROJECT_NAME}_pgdata
+
+networks:
+  default:
+    driver: bridge
