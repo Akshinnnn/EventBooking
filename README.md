@@ -1,4 +1,4 @@
-### run project using ``` make run ``` command
+### run project using ``` make run ``` command, check ``` Makefile ``` for other options
 
 # The Online Event Booking Platform
 
